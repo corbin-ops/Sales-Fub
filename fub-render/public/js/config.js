@@ -1,0 +1,9 @@
+const CONFIG = {
+  PROXY_URL: "/api/fub",
+  LOOKBACK_DAYS: 7,
+  SPEED_EXCELLENT: 5,
+  SPEED_GOOD: 60,
+  HOT_SCORE: 80,
+  WARM_SCORE: 50,
+  CLAUDE_MODEL: "claude-sonnet-4-20250514",
+};
