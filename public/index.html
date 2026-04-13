@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sales Intelligence — DewClaw Land</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/styles.css"/>
+  <style>
+    .filter-bar { display:flex; align-items:center; gap:10px; padding:10px 32px; background:var(--surface); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .filter-bar select { background:var(--surface2); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'DM Mono',monospace; font-size:11px; padding:6px 10px; outline:none; cursor:pointer; transition:border-color .15s; }
+    .filter-bar select:focus { border-color:rgba(0,229,160,0.4); }
+    .filter-bar label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+    .filter-bar .filter-group { display:flex; align-items:center; gap:6px; }
+    .filter-divider { width:1px; height:20px; background:var(--border); }
+    .sync-status { margin-left:auto; font-size:10px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+    .sync-btn { background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--muted); padding:4px 10px; cursor:pointer; font-family:'DM Mono',monospace; font-size:10px; transition:all .15s; }
+    .sync-btn:hover { border-color:var(--accent); color:var(--accent); }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="logo"><div class="logo-dot"></div>DEWCLAW LAND</div>
+    <div class="header-right">
+      <span id="clock"></span>
+      <span id="lastUpdated" style="color:var(--muted)"></span>
+      <div class="live-badge" id="liveBadge">Loading...</div>
+    </div>
+  </header>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Month</label>
+      <select id="filterMonth" onchange="Dashboard.applyFilters()">
+        <option value="">All months (2026)</option>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+      </select>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <label>Agent</label>
+      <select id="filterAgent" onchange="Dashboard.applyFilters()">
+        <option value="">All agents</option>
+      </select>
+    </div>
+    <div class="sync-status">
+      <span id="syncStatus"></span>
+      <button class="sync-btn" onclick="Dashboard.manualSync()">↺ Sync now</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" data-tab="overview">Overview</div>
+    <div class="tab" data-tab="speed">Speed to Dial</div>
+    <div class="tab" data-tab="agents">Agents</div>
+    <div class="tab" data-tab="pipeline">Pipeline</div>
+    <div class="tab" data-tab="concerns">Objections</div>
+    <div class="tab" data-tab="motivation">Motivation</div>
+    <div class="tab" data-tab="leads">Leads</div>
+    <div class="tab" data-tab="ai">AI Coach</div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="main page active" id="tab-overview">
+    <div class="section-title">Today's pulse</div>
+    <div class="grid-4">
+      <div class="card card-accent-tl ca-green">
+        <div class="card-label">Total contacts</div>
+        <div class="card-value" id="ov-total" style="color:var(--accent)">—</div>
+        <div class="card-sub" id="ov-total-sub">in FUB account</div>
+        <div class="sparkline" id="ov-spark1"></div>
+      </div>
+      <div class="card card-accent-tl ca-orange">
+        <div class="card-label">Calls logged</div>
+        <div class="card-value" id="ov-calls" style="color:var(--accent2)">—</div>
+        <div class="card-sub"><span id="ov-crate" class="delta-up">—</span> connect rate</div>
+        <div class="sparkline" id="ov-spark2"></div>
+      </div>
+      <div class="card card-accent-tl ca-purple">
+        <div class="card-label">Appointments set</div>
+        <div class="card-value" id="ov-appts" style="color:var(--accent3)">—</div>
+        <div class="card-sub"><span id="ov-arate" class="delta-up">—</span> set rate</div>
+        <div class="sparkline" id="ov-spark3"></div>
+      </div>
+      <div class="card card-accent-tl ca-yellow">
+        <div class="card-label">Avg speed to dial</div>
+        <div class="card-value" id="ov-speed" style="color:var(--accent4)">—</div>
+        <div class="card-sub">new leads this period</div>
+        <div class="sparkline" id="ov-spark4"></div>
+      </div>
+    </div>
+    <div class="grid-3-2">
+      <div class="card">
+        <div class="card-label">Pipeline funnel</div>
+        <div class="funnel" id="ovFunnel" style="margin-top:12px"><div class="ph">Loading...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Hot pipeline — acquisition</div>
+        <div id="hotLeadsList" style="margin-top:10px"><div class="ph">Loading...</div></div>
+      </div>
+    </div>
+    <div class="section-title">Call volume — last 14 days</div>
+    <div class="card">
+      <div style="display:flex;align-items:flex-end;gap:3px;height:70px" id="callVolBars"><div class="ph" style="width:100%">Loading...</div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted)" id="callVolLabels"></div>
+    </div>
+  </div>
+
+  <!-- SPEED TO DIAL -->
+  <div class="main page" id="tab-speed">
+    <div class="section-title">Speed to dial</div>
+    <div class="grid-4">
+      <div class="card card-accent-tl ca-green">
+        <div class="card-label">Avg speed to dial</div>
+        <div class="speed-ring">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="46" fill="none" stroke="#1e2530" stroke-width="8"/>
+            <circle id="speedRingFill" cx="55" cy="55" r="46" fill="none" stroke="#00e5a0" stroke-width="8" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" style="transition:stroke-dashoffset 1s ease"/>
+          </svg>
+          <div class="speed-ring-text"><div class="val" id="sd-avg">—</div><div class="unit">min</div></div>
+        </div>
+        <div class="card-sub" style="justify-content:center">avg from lead in</div>
+      </div>
+      <div class="card card-accent-tl ca-green"><div class="card-label">Called &lt; 5 min</div><div class="card-value" id="sd-u5" style="color:var(--accent)">—</div><div class="card-sub">leads reached immediately</div></div>
+      <div class="card card-accent-tl ca-yellow"><div class="card-label">Called &lt; 1 hour</div><div class="card-value" id="sd-u60" style="color:var(--accent4)">—</div><div class="card-sub">leads reached same hour</div></div>
+      <div class="card card-accent-tl ca-red"><div class="card-label">Not yet called</div><div class="card-value" id="sd-nc" style="color:var(--danger)">—</div><div class="card-sub">need action now</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Daily call volume</div>
+        <div style="display:flex;align-items:flex-end;gap:3px;height:80px;margin-top:12px" id="sdBars"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted)" id="sdLabels"></div>
+      </div>
+      <div class="card"><div class="card-label">Speed breakdown</div><div class="bar-chart" style="margin-top:12px" id="sdBreakdown"><div class="ph">Loading...</div></div></div>
+    </div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="main page" id="tab-agents">
+    <div class="section-title">Agent performance</div>
+    <div class="card" style="margin-bottom:18px"><div id="agentTable"><div class="ph">Loading...</div></div></div>
+    <div class="grid-3">
+      <div class="card card-accent-tl ca-green"><div class="card-label">Top dialer</div><div class="card-value" id="ag-topDialer" style="color:var(--accent);font-size:20px">—</div><div class="card-sub" id="ag-topDialerSub"></div></div>
+      <div class="card card-accent-tl ca-purple"><div class="card-label">Top appt setter</div><div class="card-value" id="ag-topAppt" style="color:var(--accent3);font-size:20px">—</div><div class="card-sub" id="ag-topApptSub"></div></div>
+      <div class="card card-accent-tl ca-yellow"><div class="card-label">Fastest dialer</div><div class="card-value" id="ag-fastest" style="color:var(--accent4);font-size:20px">—</div><div class="card-sub" id="ag-fastestSub"></div></div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="main page" id="tab-pipeline">
+    <div class="section-title">Smart list collections</div>
+    <div class="grid-4" id="collectionCards"><div class="ph">Loading...</div></div>
+    <div class="grid-2">
+      <div class="card"><div class="card-label">Top stages</div><div class="bar-chart" style="margin-top:12px" id="stageChart"><div class="ph">Loading...</div></div></div>
+      <div class="card"><div class="card-label">Lead sources</div><div class="bar-chart" style="margin-top:12px" id="sourceChart"><div class="ph">Loading...</div></div></div>
+    </div>
+  </div>
+
+  <!-- CONCERNS -->
+  <div class="main page" id="tab-concerns">
+    <div class="section-title">Objections &amp; concerns</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Top objections from notes</div>
+        <div id="concernList" style="margin-top:10px"><div class="ph">Loading...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Winning scripts</div>
+        <div style="margin-top:10px">
+          <div class="script-block" style="border-left:3px solid var(--accent)"><span style="color:var(--accent);font-weight:600">Price too low →</span> "I totally understand — what number would make it a no-brainer for you? Let me take that back to our team."</div>
+          <div class="script-block" style="border-left:3px solid var(--accent4)"><span style="color:var(--accent4);font-weight:600">Not ready yet →</span> "Totally get it — when do you see yourself making a move? Even 6–12 months out, let's stay in touch."</div>
+          <div class="script-block" style="border-left:3px solid var(--accent3)"><span style="color:var(--accent3);font-weight:600">Has other offers →</span> "Completely fair — what number would it take to do business with us today?"</div>
+          <div class="script-block" style="border-left:3px solid var(--accent2)"><span style="color:var(--accent2);font-weight:600">Needs more time →</span> "Of course — can we set a follow-up for [date]? I'll have more info for you by then."</div>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <div class="card-label" style="margin-bottom:8px">Call summary themes</div>
+          <div id="callThemes"><div class="ph" style="padding:.5rem">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTIVATION -->
+  <div class="main page" id="tab-motivation">
+    <div class="section-title">Client motivation insights</div>
+    <div class="grid-4">
+      <div class="card ca-green card-accent-tl"><div class="card-label">Hot — motivated</div><div class="card-value" id="mot-hot" style="color:var(--accent)">—</div><div class="card-sub">booked / contract / active</div></div>
+      <div class="card ca-yellow card-accent-tl"><div class="card-label">Warm — engaged</div><div class="card-value" id="mot-warm" style="color:var(--accent4)">—</div><div class="card-sub">value add / range offer</div></div>
+      <div class="card ca-purple card-accent-tl"><div class="card-label">Nurture — LTFU</div><div class="card-value" id="mot-nurture" style="color:var(--accent3)">—</div><div class="card-sub">not ready / price rejected</div></div>
+      <div class="card ca-orange card-accent-tl"><div class="card-label">Cold — unmotivated</div><div class="card-value" id="mot-cold" style="color:var(--accent2)">—</div><div class="card-sub">dead / removed</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Motivation matrix</div>
+        <div class="mot-grid" style="margin-top:12px">
+          <div class="mq-axis-h"></div><div class="mq-axis-v"></div>
+          <div class="mq-cell mq-tr"><div class="mq-label" style="color:var(--accent2)">Stretch</div><div class="mq-count" id="mq-stretch" style="color:var(--accent2)">—</div><div class="mq-sub">High urgency, cold stage</div></div>
+          <div class="mq-cell mq-tl"><div class="mq-label" style="color:var(--accent)">⭐ Priority</div><div class="mq-count" id="mq-priority" style="color:var(--accent)">—</div><div class="mq-sub">Hot — call now</div></div>
+          <div class="mq-cell mq-bl"><div class="mq-label" style="color:var(--muted)">Nurture</div><div class="mq-count" id="mq-nurture" style="color:var(--muted)">—</div><div class="mq-sub">Long-term drip</div></div>
+          <div class="mq-cell mq-br"><div class="mq-label" style="color:var(--accent3)">Re-engage</div><div class="mq-count" id="mq-reengage" style="color:var(--accent3)">—</div><div class="mq-sub">Warm but stalled</div></div>
+        </div>
+        <div class="card-label" style="margin:12px 0 8px">Top concerns</div>
+        <div class="bar-chart" id="motivatorBars"><div class="ph" style="padding:.5rem">Loading...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Hot leads — call now</div>
+        <div id="hotLeadsMotList" style="margin-top:10px"><div class="ph">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADS -->
+  <div class="main page" id="tab-leads">
+    <div class="section-title">
+      Leads
+      <input type="text" id="leadSearch" class="search-input" style="font-size:11px;margin-left:auto" placeholder="Search name, stage, source..." oninput="Dashboard.filterLeads(this.value)"/>
+    </div>
+    <div class="card"><div id="leadsTable"><div class="ph">Loading...</div></div></div>
+  </div>
+
+  <!-- AI COACH -->
+  <div class="main page" id="tab-ai">
+    <div class="section-title">AI acquisitions coach</div>
+    <div class="ai-card">
+      <div class="ai-header">
+        <div class="ai-avatar">AI</div>
+        <div><div class="ai-title">Claude — Acquisitions Intelligence</div><div class="ai-sub">Full pipeline · call summaries · agent performance · seller insights</div></div>
+        <button class="ai-refresh" onclick="Dashboard.runAI()">↺ Refresh</button>
+      </div>
+      <div class="ai-body" id="aiInsights"><span class="ai-thinking">Loading data...</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="js/config.js"></script>
+<script src="js/fub.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  // Clock
+  function tick() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}); }
+  tick(); setInterval(tick, 1000);
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab)?.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
